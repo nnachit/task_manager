@@ -1,4 +1,6 @@
 import customtkinter as ctk
+from tkinter import messagebox
+
 
 class TodoApp():
     def __init__(self, root):
@@ -29,7 +31,7 @@ class TodoApp():
             self.update_task()
             self.task_input.delete(0, ctk.END)
         else:
-            pass  # TODO : add error message
+            messagebox.showerror("Error", "The task entry is empty")
 
     def delete_task(self):
         # TODO : delete selected task    
