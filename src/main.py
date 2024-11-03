@@ -1,5 +1,7 @@
 import customtkinter as ctk
+import pickle
 from tkinter import messagebox
+from tkinter import Listbox
 
 
 class TodoApp:
@@ -17,9 +19,6 @@ class TodoApp:
         self.task_input = ctk.CTkEntry(self.root, width=500)
         self.task_input.pack(pady=10)
 
-        self.task_frame = ctk.CTkScrollableFrame(self.root, width=500, height=150)
-        self.task_frame.pack(pady=10)
-
         self.add_task_button = ctk.CTkButton(
             self.root, width=500, text="Add Task", command=self.add_task
         )
@@ -29,6 +28,13 @@ class TodoApp:
             self.root, width=500, text="Delete Task", command=self.delete_task
         )
         self.delete_task_button.pack(pady=10)
+
+        self.task_listbox = Listbox(
+            self.root, width=60, background="black", foreground="white"
+        )
+        self.task_listbox.pack(pady=10)
+
+        self.load_tasks()
 
     def add_task(self):
         task = self.task_input.get()
@@ -41,21 +47,30 @@ class TodoApp:
 
     def delete_task(self):
         try:
-            selected_task_index = self.task_frame.curselection()[
-                0
-            ]  # Récupère l'index de l'élément sélectionné
-            del self.tasks[selected_task_index]
-            self.update_task()
-        except IndexError:
-            messagebox.showwarning("Warning", "You must select a task to delete.")
+            selected_task = self.task_listbox.get(self.task_listbox.curselection())
+            self.tasks.remove(selected_task)
+        except:
+            messagebox.showwarning("Warning", "Select a task to delete")
+
+        self.update_task()
 
     def update_task(self):
-        for widget in self.task_frame.winfo_children():
-            widget.destroy()
-
+        self.task_listbox.delete(0, ctk.END)
+        self.save_tasks()
         for task in self.tasks:
-            task_label = ctk.CTkLabel(self.task_frame, text=task, anchor="w")
-            task_label.pack(fill="x", pady=2)
+            self.task_listbox.insert(ctk.END, task)
+
+    def save_tasks(self):
+        with open("save.txt", "wb") as f:
+            pickle.dump(self.tasks, f)
+
+    def load_tasks(self):
+        try:
+            with open("save.txt", "rb") as f:
+                self.tasks = pickle.load(f)
+        except EOFError:
+            pass
+        self.update_task()
 
 
 if __name__ == "__main__":
